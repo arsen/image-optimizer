@@ -1,6 +1,5 @@
 **Node based PNG compressor tool.**
 
-Install:
 git clone git@gitlab.aofl.com:arsenghazaryan/image-optimizer.git
 
 cd image-optimizer
