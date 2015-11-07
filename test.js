@@ -1,6 +1,5 @@
-var execFile = require('child_process').execFile;
-var pngquant = require('pngquant-bin');
+var glob = require("glob");
 
-execFile(pngquant, ['-o', 'images/bg_fall-min.png', 'images/bg_fall.png'], function(err) {
-	console.log(err, 'Image minified!');
+glob('/Users/arsenghazaryan/Documents/aofl/member.abcmouse.com/abcmouse_classroom/first_grade_com_en/img/april.png', function(err, files) {
+	console.log(files);
 });
