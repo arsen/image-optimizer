@@ -9,10 +9,10 @@ npm install (to install all dependencies)
 
 ./compress -h (to get help)
 
-example usage: 
+**example usage:**
 
-to optimize the whole folder
+**to optimize the whole folder**
 ./compress -path /Users/arsenghazaryan/Documents/aofl/member.abcmouse.com/abcmouse_subject_pages/
 
-to optimize a single file:
+**to optimize a single file:**
 ./compress -path /Users/arsenghazaryan/Documents/aofl/member.abcmouse.com/abcmouse_subject_pages/home_cn_zhs/img/icons/levels/beginner.png
