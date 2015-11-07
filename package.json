@@ -1,0 +1,17 @@
+{
+  "name": "img-compressor",
+  "version": "1.0.0",
+  "description": "Image compression utility",
+  "scripts": {
+    "compress": "node compress.js"
+  },
+  "author": "Arsen Ghazaryan",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^0.26.2",
+    "glob": "^5.0.15",
+    "pngquant-bin": "^3.0.0"
+  },
+  "main": "compress.js",
+  "devDependencies": {}
+}
