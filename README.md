@@ -11,7 +11,7 @@ npm install (to install all dependencies)
 **example usage:**
 
 **to optimize the whole folder**
-./compress -path /Users/arsenghazaryan/Documents/aofl/member.abcmouse.com/abcmouse_subject_pages/
+./compress -path /PATH TO FOLDER/
 
 **to optimize a single file:**
-./compress -path /Users/arsenghazaryan/Documents/aofl/member.abcmouse.com/abcmouse_subject_pages/home_cn_zhs/img/icons/levels/beginner.png
+./compress -path /PATH TO FILE.png
