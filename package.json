@@ -1,6 +1,6 @@
 {
   "name": "image-optimize",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "Image compression utility",
   "scripts": {
     "compress": "node compress.js"
