@@ -1,17 +1,13 @@
 **Node based PNG compressor tool.**
 
-git clone git@gitlab.aofl.com:arsenghazaryan/image-optimizer.git
+npm install -g image-optimize
 
-cd image-optimizer
-
-npm install (to install all dependencies)
-
-./compress -h (to get help)
+image-optimize -h (to get help)
 
 **example usage:**
 
 **to optimize the whole folder**
-./compress -path /PATH TO FOLDER/
+image-optimize -p /PATH TO FOLDER/
 
 **to optimize a single file:**
-./compress -path /PATH TO FILE.png
+image-optimize -p /PATH TO FILE.png
