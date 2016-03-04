@@ -5,6 +5,9 @@
   "scripts": {
     "compress": "node compress.js"
   },
+  "bin": {
+    "image-optimize": "image-optimize.js"
+  },
   "author": "Arsen Ghazaryan",
   "license": "ISC",
   "dependencies": {
