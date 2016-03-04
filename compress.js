@@ -73,7 +73,7 @@ utils.getSizeInfo(imgDir + fileType, function(err, result) {
 var currentFileIndex = 0;
 var resursiveOptimize = function(src, dest) {
 	process.stdout.write(currentFileIndex + ". Processing file: " + src+' ... ');
-	execFile(pngquant, ['-o', dest, src, '--nofs'], function(err) {
+	execFile(pngquant, ['-o', dest, src], function(err) {
 		if (err) {
 			console.log(err);
 			process.exit();

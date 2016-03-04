@@ -17,6 +17,6 @@
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git@gitlab.aofl.com:arsenghazaryan/image-optimizer.git"
+    "url": "git@github.com:arsenghazaryan/image-optimizer.git"
   }
 }
