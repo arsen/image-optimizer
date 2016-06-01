@@ -62,23 +62,33 @@ utils.getSizeInfo(imgDir + fileType, function(err, result) {
 	console.log('#########################');
 	origSize = result.size;
 
-	for (var i = 0; i < result.files.length; i++) {
-		var dir = tmpDir + path.dirname(result.files[i]);
-		fsExtra.mkdirsSync(dir);
-	}
+	fsExtra.mkdirsSync(tmpDir);
 	
 	currentFileIndex = 0;
-	resursiveOptimize(result.files[currentFileIndex], tmpDir + result.files[currentFileIndex]);
+	resursiveOptimize(result.files[currentFileIndex], tmpDir + '/' + path.basename(dirData.files[currentFileIndex]));
 });
 
 
 var currentFileIndex = 0;
+
+function cleanUpTempFolder(){
+	fsExtra.remove(tmpDir, function(err) {
+		if (err) {
+			console.log('error cleaning tmp files');
+		}
+		else {
+			console.log('Done cleaning TMP files');
+		}
+		process.exit();
+	});
+}
+
 var resursiveOptimize = function(src, dest) {
 	process.stdout.write(currentFileIndex + ". Processing file: " + src+' ... ');
 	execFile(pngquant, ['-o', dest, src], function(err) {
 		if (err) {
 			console.log(err);
-			process.exit();
+			cleanUpTempFolder();
 		}
 		var sizeBefore = Math.round(fs.statSync(src).size / 1024);
 		var sizeAfter = Math.round(fs.statSync(dest).size / 1024);
@@ -87,7 +97,7 @@ var resursiveOptimize = function(src, dest) {
 		console.log('done! ('+changePercent+'%)');
 		currentFileIndex++;
 		if (currentFileIndex < dirData.files.length) {
-			resursiveOptimize(dirData.files[currentFileIndex], tmpDir + dirData.files[currentFileIndex]);
+			resursiveOptimize(dirData.files[currentFileIndex], tmpDir + '/' + path.basename(dirData.files[currentFileIndex]));
 		} else {
 			utils.getSizeInfo(tmpDir + imgDir + fileType, function(err, result) {
 				optimizedSize = result.size;
@@ -105,21 +115,13 @@ var resursiveOptimize = function(src, dest) {
 				var copyOptions = {
 					clobber: true
 				};
-				fsExtra.copy(tmpDir + imgDir, imgDir, copyOptions, function(err) {
+				fsExtra.copy(tmpDir, imgDir, copyOptions, function(err) {
 					if (err) {
 						console.log('Error copying files back to original location');
 					} else {
 						console.log('Done copying files back to original location');
-						fsExtra.remove(tmpDir, function(err) {
-							if (err) {
-								console.log('error cleaning tmp files');
-							}
-							else {
-								console.log('Done cleaning TMP files');
-							}
-							process.exit();
-						});
 					}
+					cleanUpTempFolder();
 				});
 			});
 		}
