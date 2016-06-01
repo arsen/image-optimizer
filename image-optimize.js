@@ -13,7 +13,7 @@ var fileTypes = {
 	png: '**/*.png'
 };
 
-var fileType, imgDir, tmpDir = './tmp';
+var fileType, imgDir, tmpDir = './tmp/';
 
 program
   .version('0.0.1')
@@ -62,27 +62,28 @@ utils.getSizeInfo(imgDir + fileType, function(err, result) {
 	console.log('#########################');
 	origSize = result.size;
 
-	fsExtra.mkdirsSync(tmpDir);
+	for (var i = 0; i < result.files.length; i++) {
+		var dir = tmpDir + path.dirname(result.files[i]);
+		fsExtra.mkdirsSync(dir);
+	}
 	
 	currentFileIndex = 0;
-	resursiveOptimize(result.files[currentFileIndex], tmpDir + '/' + path.basename(dirData.files[currentFileIndex]));
+	resursiveOptimize(result.files[currentFileIndex], tmpDir + result.files[currentFileIndex]);
 });
 
-
-var currentFileIndex = 0;
-
 function cleanUpTempFolder(){
-	fsExtra.remove(tmpDir, function(err) {
-		if (err) {
-			console.log('error cleaning tmp files');
-		}
-		else {
-			console.log('Done cleaning TMP files');
-		}
-		process.exit();
-	});
+  fsExtra.remove(tmpDir, function(err) {
+    if (err) {
+      console.log('error cleaning tmp files');
+    }
+    else {
+      console.log('Done cleaning TMP files');
+    }
+    process.exit();
+  });
 }
 
+var currentFileIndex = 0;
 var resursiveOptimize = function(src, dest) {
 	process.stdout.write(currentFileIndex + ". Processing file: " + src+' ... ');
 	execFile(pngquant, ['-o', dest, src], function(err) {
@@ -97,9 +98,9 @@ var resursiveOptimize = function(src, dest) {
 		console.log('done! ('+changePercent+'%)');
 		currentFileIndex++;
 		if (currentFileIndex < dirData.files.length) {
-			resursiveOptimize(dirData.files[currentFileIndex], tmpDir + '/' + path.basename(dirData.files[currentFileIndex]));
+			resursiveOptimize(dirData.files[currentFileIndex], tmpDir + dirData.files[currentFileIndex]);
 		} else {
-			utils.getSizeInfo(tmpDir + '/' + fileType, function(err, result) {
+			utils.getSizeInfo(tmpDir + imgDir + fileType, function(err, result) {
 				optimizedSize = result.size;
 
 				console.log('### After optimizing ###');
@@ -115,13 +116,13 @@ var resursiveOptimize = function(src, dest) {
 				var copyOptions = {
 					clobber: true
 				};
-				fsExtra.copy(tmpDir, imgDir, copyOptions, function(err) {
+				fsExtra.copy(tmpDir + imgDir, imgDir, copyOptions, function(err) {
 					if (err) {
 						console.log('Error copying files back to original location');
 					} else {
 						console.log('Done copying files back to original location');
+						cleanUpTempFolder();
 					}
-					cleanUpTempFolder();
 				});
 			});
 		}
