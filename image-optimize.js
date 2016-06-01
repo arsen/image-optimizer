@@ -99,7 +99,7 @@ var resursiveOptimize = function(src, dest) {
 		if (currentFileIndex < dirData.files.length) {
 			resursiveOptimize(dirData.files[currentFileIndex], tmpDir + '/' + path.basename(dirData.files[currentFileIndex]));
 		} else {
-			utils.getSizeInfo(tmpDir + imgDir + fileType, function(err, result) {
+			utils.getSizeInfo(tmpDir + '/' + fileType, function(err, result) {
 				optimizedSize = result.size;
 
 				console.log('### After optimizing ###');
