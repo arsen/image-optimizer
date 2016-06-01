@@ -13,7 +13,7 @@ var fileTypes = {
 	png: '**/*.png'
 };
 
-var fileType, imgDir, tmpDir = './tmp';
+var fileType, imgDir, tmpDir = './tmp/';
 
 program
   .version('0.0.1')
@@ -71,6 +71,17 @@ utils.getSizeInfo(imgDir + fileType, function(err, result) {
 	resursiveOptimize(result.files[currentFileIndex], tmpDir + result.files[currentFileIndex]);
 });
 
+function cleanUpTempFolder(){
+  fsExtra.remove(tmpDir, function(err) {
+    if (err) {
+      console.log('error cleaning tmp files');
+    }
+    else {
+      console.log('Done cleaning TMP files');
+    }
+    process.exit();
+  });
+}
 
 var currentFileIndex = 0;
 var resursiveOptimize = function(src, dest) {
@@ -78,7 +89,7 @@ var resursiveOptimize = function(src, dest) {
 	execFile(pngquant, ['-o', dest, src], function(err) {
 		if (err) {
 			console.log(err);
-			process.exit();
+			cleanUpTempFolder();
 		}
 		var sizeBefore = Math.round(fs.statSync(src).size / 1024);
 		var sizeAfter = Math.round(fs.statSync(dest).size / 1024);
@@ -110,15 +121,7 @@ var resursiveOptimize = function(src, dest) {
 						console.log('Error copying files back to original location');
 					} else {
 						console.log('Done copying files back to original location');
-						fsExtra.remove(tmpDir, function(err) {
-							if (err) {
-								console.log('error cleaning tmp files');
-							}
-							else {
-								console.log('Done cleaning TMP files');
-							}
-							process.exit();
-						});
+						cleanUpTempFolder();
 					}
 				});
 			});
