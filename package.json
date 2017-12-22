@@ -1,12 +1,15 @@
 {
   "name": "image-optimize",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "description": "Image compression utility",
   "scripts": {
+    "clean": "rm -rf dist/**",
+    "build": "./node_modules/babel-cli/bin/babel.js src -d dist",
+    "postinstall": "npm run clean && npm run build",
     "compress": "node compress.js"
   },
   "bin": {
-    "image-optimize": "image-optimize.js"
+    "image-optimize": "./bin/image-optimizer-cli.js"
   },
   "author": "Arsen Ghazaryan",
   "license": "ISC",
@@ -16,10 +19,15 @@
     "fs-extra": "^0.26.2",
     "glob": "^5.0.15",
     "jpegtran-bin": "^3.2.0",
-    "pngquant-bin": "^3.0.0"
+    "babel-polyfill": "^6.26.0",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "pngquant-bin": "^3.0.0",
+    "semver": "^5.4.1"
   },
   "main": "compress.js",
-  "devDependencies": {},
+  "devDependencies": {
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:arsenghazaryan/image-optimizer.git"

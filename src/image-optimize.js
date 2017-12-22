@@ -1,42 +1,51 @@
-#!/usr/bin/env node
-
-var program = require('commander');
-var fs = require('fs');
-var fsExtra = require('fs-extra');
-var path = require('path');
-var execFile = require('child_process').execFile;
-var utils = require('./utils');
+const fs = require('fs');
+const fsExtra = require('fs-extra');
+const path = require('path');
+const execFile = require('child_process').execFile;
+const utils = require('./utils');
 const confirm = require('confirm-simple');
 
-var fileTypes = {
+const fileTypes = {
   png: '**/*.png',
   jpg: '**/*.jpg'
 };
 
+const compression = {};
+let imgPath;
 var fileType, imgDir, tmpDir = './tmp/';
-
+const program = require('commander');
 program
-  .version('0.0.1')
-  .usage('[options] <PATHS...>')
-  .option('-t, --type [IMGTYPE]', 'File type (for now only .PNG is supported) [PNG]', 'png')
-  .option('-a, --audit [TRESHHOLD]', 'Check which files will be optimized', '')
+  .version('1.0.0')
+  .usage('[options] <IMGTYPE> <PATH>')
+  // .option('-t, --type [IMGTYPE]', 'File type (for now only .PNG is supported) [PNG]', 'png')
+  .option('-a, --audit <TRESHHOLD>', 'Check which files will be optimized', '')
   .option('-v, --verbose', 'Make some noise', '')
+  .arguments('<IMGTYPE> <PATH>')
+  .action((IMGTYPE, PATH) => {
+    selectCompression(IMGTYPE);
+    imgPath = PATH;
+  })
   .parse(process.argv);
 
-const compression = {};
-if (typeof fileTypes[program.type] === 'undefined') {
-	console.log('Invalid FILE TYPE');
-	process.exit();
-} else if (program.type === 'png') {
-  compression.binary = require('pngquant-bin');
-  compression.option = ['-o'];
-} else if (program.type === 'jpg') {
-  compression.binary = require('jpegtran-bin');
-  compression.option = ['-progressive', '-optimize', '-outfile'];
+function selectCompression(filetype) {
+  switch (filetype) {
+    case 'png':
+      compression.binary = require('pngquant-bin');
+      compression.option = ['-o'];
+      compression.type = filetype;
+      break;
+    case 'jpg':
+      compression.binary = require('jpegtran-bin');
+      compression.option = ['-progressive', '-optimize', '-outfile'];
+      compression.type = filetype;
+      break;
+    default:
+      console.log('Invalid <IMGTYPE>');
+      process.exit();
+  }
 }
 
 try {
-  let imgPath = program.args[0];
 	imgPath = path.normalize(imgPath);
 	var pathStats = fs.statSync(imgPath);
 
@@ -44,7 +53,7 @@ try {
 		if (imgPath[imgPath.length-1] !== '/')
 			imgPath = imgPath + '/';
 
-		fileType = fileTypes[program.type];
+		fileType = fileTypes[compression.type];
 		imgDir = imgPath;
 	}
 	if (pathStats.isFile()) {
@@ -58,23 +67,27 @@ try {
 
 utils.getSizeInfo(imgDir + fileType, (err, result) => {
   if (err) { throw err }
-  const originalSize = result.size;
+  const originalSize = Math.round((result.size) / 1024);
 
-  logStart(result.files, originalSize);
+  if (program.verbose) {
+    logStart(result.files, originalSize);
+  }
   optimizeBatch(result.files).then(files => {
     if (program.audit) {
       removeTmpDir();
       printFiles(files, program.audit);
     } else {
       confirm('Would you like to replace these files?', ok => {
-        if (ok) {
-          utils.getSizeInfo(tmpDir + imgDir + fileType, function(err, result) {
-            const optimizedSize = result.size;
-            var totalSizeReduced = Math.round((originalSize - optimizedSize) / 1024);
-            var totalSizeReducedPercent = 100 - Math.round(optimizedSize / originalSize * 100);
-            logEnd(result.files.length, result.size, totalSizeReduced, totalSizeReducedPercent);
-            cleanup();
-          });
+        if (ok && program.verbose) {
+          let optimizedSize = 0;
+          files.forEach(file => optimizedSize += file.destSize);
+          console.log(optimizedSize);
+          var totalSizeReduced = originalSize - optimizedSize;
+          var totalSizeReducedPercent = 100 - Math.round(optimizedSize / originalSize * 100);
+          logEnd(files.length, optimizedSize, totalSizeReduced, totalSizeReducedPercent);
+          replaceSrcFiles();
+        } else if (ok) {
+          replaceSrcFiles();
         } else {
           removeTmpDir();
         }
@@ -86,19 +99,19 @@ utils.getSizeInfo(imgDir + fileType, (err, result) => {
 function logStart(fileCount, dirSize) {
   console.log('### Before optimizing ###');
   console.log('Files: ' + fileCount);
-  console.log('Total Size: ' + Math.round(dirSize / 1024) + 'kb');
+  console.log('Total Size: ' + dirSize + 'kb');
   console.log('#########################');
 }
 
 function logEnd(fileCount, dirSize, sizeReduced, percentReduced) {
   console.log('### After optimizing ###');
   console.log('Files: ' + fileCount);
-  console.log('Total Size: ' + Math.round(dirSize / 1024) + 'kb');
+  console.log('Total Size: ' + dirSize + 'kb');
   console.log('Total size reduced by: '+sizeReduced+'kb ('+percentReduced+'%)');
   console.log('#########################');
 }
 
-function cleanup() {
+function replaceSrcFiles() {
   var copyOptions = {
     clobber: true
   };
@@ -158,6 +171,8 @@ function optimize(src, dest) {
       resolve({
         src,
         dest,
+        srcSize: sizeBefore,
+        destSize: sizeAfter,
         changePercent
       });
     });
@@ -165,7 +180,6 @@ function optimize(src, dest) {
 }
 
 function printFiles(files, threshold) {
-  console.log(`All files over ${threshold}%`);
   for (let i = 0, j = files.length; i < j; i ++) {
     if (files[i].changePercent >= threshold) {
       process.stdout.write(files[i].src + '\n');
