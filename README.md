@@ -1,13 +1,20 @@
-**Node based PNG compressor tool.**
+**Node based PNG/JPG compressor tool.**
 
 npm install -g image-optimize
 
 image-optimize -h (to get help)
 
-**example usage:**
+## Example Usage
 
-**to optimize the whole folder**
-image-optimize -p /PATH TO FOLDER/
+**To optimize an entire directory tree**
 
-**to optimize a single file:**
-image-optimize -p /PATH TO FILE.png
+`image-optimize png /PATH TO FOLDER/`
+
+**To optimize a single file:**
+
+`image-optimize -p /PATH TO FILE.png`
+
+## Contributing
+Build the app to *dist* folder:
+
+`npm run build`
