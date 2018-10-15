@@ -12,7 +12,9 @@ const fileTypes = {
 
 const compression = {};
 let imgPath;
-var fileType, imgDir, tmpDir = './tmp/';
+var fileType,
+  imgDir,
+  tmpDir = './tmp/';
 const program = require('commander');
 program
   .version('1.0.0')
@@ -20,6 +22,7 @@ program
   // .option('-t, --type [IMGTYPE]', 'File type (for now only .PNG is supported) [PNG]', 'png')
   .option('-a, --audit <TRESHHOLD>', 'Check which files will be optimized', '')
   .option('-v, --verbose', 'Make some noise', '')
+  .option('-f, --force', 'Force overwriting files', '')
   .arguments('<IMGTYPE> <PATH>')
   .action((IMGTYPE, PATH) => {
     selectCompression(IMGTYPE);
@@ -46,28 +49,29 @@ function selectCompression(filetype) {
 }
 
 try {
-	imgPath = path.normalize(imgPath);
-	var pathStats = fs.statSync(imgPath);
+  imgPath = path.normalize(imgPath);
+  var pathStats = fs.statSync(imgPath);
 
-	if (pathStats.isDirectory()) {
-		if (imgPath[imgPath.length-1] !== '/')
-			imgPath = imgPath + '/';
+  if (pathStats.isDirectory()) {
+    if (imgPath[imgPath.length - 1] !== '/') imgPath = imgPath + '/';
 
-		fileType = fileTypes[compression.type];
-		imgDir = imgPath;
-	}
-	if (pathStats.isFile()) {
-		imgDir = path.dirname(imgPath) + '/';
-		fileType = path.basename(imgPath);
-	}
-} catch(e) {
-	console.log('Invalid PATH');
-	process.exit();
+    fileType = fileTypes[compression.type];
+    imgDir = imgPath;
+  }
+  if (pathStats.isFile()) {
+    imgDir = path.dirname(imgPath) + '/';
+    fileType = path.basename(imgPath);
+  }
+} catch (e) {
+  console.log('Invalid PATH');
+  process.exit();
 }
 
 utils.getSizeInfo(imgDir + fileType, (err, result) => {
-  if (err) { throw err }
-  const originalSize = Math.round((result.size) / 1024);
+  if (err) {
+    throw err;
+  }
+  const originalSize = Math.round(result.size / 1024);
 
   if (program.verbose) {
     logStart(result.files, originalSize);
@@ -76,15 +80,23 @@ utils.getSizeInfo(imgDir + fileType, (err, result) => {
     if (program.audit) {
       removeTmpDir();
       printFiles(files, program.audit);
+    } else if (program.force) {
+      replaceSrcFiles();
     } else {
       confirm('Would you like to replace these files?', ok => {
         if (ok && program.verbose) {
           let optimizedSize = 0;
-          files.forEach(file => optimizedSize += file.destSize);
+          files.forEach(file => (optimizedSize += file.destSize));
           console.log(optimizedSize);
           var totalSizeReduced = originalSize - optimizedSize;
-          var totalSizeReducedPercent = 100 - Math.round(optimizedSize / originalSize * 100);
-          logEnd(files.length, optimizedSize, totalSizeReduced, totalSizeReducedPercent);
+          var totalSizeReducedPercent =
+            100 - Math.round((optimizedSize / originalSize) * 100);
+          logEnd(
+            files.length,
+            optimizedSize,
+            totalSizeReduced,
+            totalSizeReducedPercent
+          );
           replaceSrcFiles();
         } else if (ok) {
           replaceSrcFiles();
@@ -107,7 +119,9 @@ function logEnd(fileCount, dirSize, sizeReduced, percentReduced) {
   console.log('### After optimizing ###');
   console.log('Files: ' + fileCount);
   console.log('Total Size: ' + dirSize + 'kb');
-  console.log('Total size reduced by: '+sizeReduced+'kb ('+percentReduced+'%)');
+  console.log(
+    'Total size reduced by: ' + sizeReduced + 'kb (' + percentReduced + '%)'
+  );
   console.log('#########################');
 }
 
@@ -128,18 +142,18 @@ function replaceSrcFiles() {
 async function optimizeBatch(files) {
   let fileChange = [];
 
-	for (var i = 0; i < files.length; i++) {
-		var dir = tmpDir + path.dirname(files[i]);
-		fsExtra.mkdirsSync(dir);
-	}
+  for (var i = 0; i < files.length; i++) {
+    var dir = tmpDir + path.dirname(files[i]);
+    fsExtra.mkdirsSync(dir);
+  }
 
-  for (let i = 0, j = files.length; i < j; i ++) {
+  for (let i = 0, j = files.length; i < j; i++) {
     let file = files[i];
-    process.stdout.write(i + ". Processing file: " + file+' ... ');
+    process.stdout.write(i + '. Processing file: ' + file + ' ... ');
     try {
       let fileOutput = await optimize(file, tmpDir + file);
       fileChange.push(fileOutput);
-      console.log('done! ('+fileOutput.changePercent+'%)');
+      console.log('done! (' + fileOutput.changePercent + '%)');
     } catch (e) {
       console.log(e);
     }
@@ -147,7 +161,7 @@ async function optimizeBatch(files) {
   return fileChange;
 }
 
-function removeTmpDir(){
+function removeTmpDir() {
   fsExtra.remove(tmpDir, function(err) {
     if (err) {
       console.log('error cleaning tmp files');
@@ -158,14 +172,16 @@ function removeTmpDir(){
 
 function optimize(src, dest) {
   return new Promise((resolve, reject) => {
-    execFile(compression.binary, [...compression.option, dest, src], function(err) {
+    execFile(compression.binary, [...compression.option, dest, src], function(
+      err
+    ) {
       if (err) {
         removeTmpDir();
         reject(err);
       }
       var sizeBefore = Math.round(fs.statSync(src).size / 1024);
       var sizeAfter = Math.round(fs.statSync(dest).size / 1024);
-      var changePercent = 100 - Math.round(sizeAfter / sizeBefore * 100);
+      var changePercent = 100 - Math.round((sizeAfter / sizeBefore) * 100);
       changePercent = Math.max(0, changePercent);
 
       resolve({
@@ -180,7 +196,7 @@ function optimize(src, dest) {
 }
 
 function printFiles(files, threshold) {
-  for (let i = 0, j = files.length; i < j; i ++) {
+  for (let i = 0, j = files.length; i < j; i++) {
     if (files[i].changePercent >= threshold) {
       process.stdout.write(files[i].src + '\n');
     }
