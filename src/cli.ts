@@ -22,7 +22,7 @@ export function createCli(): Command {
     .option('-t, --type <format>', `image format (${formats.join(', ')}); omit to process all supported types`)
     .option('-a, --audit <threshold>', 'audit mode: list files above savings threshold (%)', parseInt)
     .option('-q, --quality <n>', 'compression quality 1-100 (default: 80)', parseInt)
-    .option('-v, --verbose', 'verbose output')
+    .option('-s, --silent', 'suppress per-file output')
     .option('-f, --force', 'overwrite originals without confirmation')
     .option('-c, --concurrency <n>', 'max parallel tasks (default: CPU cores)', parseInt)
     .action(async (inputPath: string | undefined, opts) => {
@@ -43,7 +43,7 @@ export function createCli(): Command {
 
       const engine = new OptimizerEngine(registry, {
         quality: opts.quality,
-        verbose: opts.verbose,
+        silent: opts.silent,
         force: opts.force,
         concurrency: opts.concurrency,
       });
@@ -63,7 +63,7 @@ export function createCli(): Command {
         return;
       }
 
-      if (opts.verbose) {
+      if (!opts.silent) {
         console.log(`Found ${files.length} file(s)\n`);
       }
 

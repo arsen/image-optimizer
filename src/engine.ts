@@ -74,7 +74,7 @@ export class OptimizerEngine {
               srcSize > 0 ? Math.round((savings / srcSize) * 100) : 0;
 
             const seq = ++completed;
-            if (this.options.verbose) {
+            if (!this.options.silent) {
               process.stdout.write(
                 `[${seq}/${files.length}] ${relative} ... done (${Math.max(0, savingsPercent)}%)\n`,
               );

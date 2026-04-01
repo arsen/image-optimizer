@@ -22,7 +22,7 @@ export interface BatchResult {
 export interface OptimizeOptions {
   quality?: number;
   force?: boolean;
-  verbose?: boolean;
+  silent?: boolean;
   concurrency?: number;
 }
 

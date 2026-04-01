@@ -27,7 +27,7 @@ image-optimize <path> [options]
 | `-t, --type <format>` | Image format (`png`, `jpg`, `webp`, `avif`). Omit to process all supported types. Ignored for single files (derived from extension). |
 | `-a, --audit <threshold>` | Audit mode: list files exceeding the savings threshold (%) |
 | `-q, --quality <n>` | Compression quality 1–100 (default: 80) |
-| `-v, --verbose` | Verbose output |
+| `-s, --silent` | Suppress per-file output |
 | `-f, --force` | Overwrite originals without confirmation |
 | `-c, --concurrency <n>` | Max parallel tasks (default: CPU cores) |
 
@@ -81,7 +81,7 @@ image-optimize ./assets/ -t png --audit 10
 import { optimize, audit } from 'image-optimize';
 
 // Optimize all supported images in a directory
-const result = await optimize('./images', { quality: 85, verbose: true, concurrency: 4 });
+const result = await optimize('./images', { quality: 85, concurrency: 4 });
 console.log(`Saved ${result.totalSavingsPercent}%`);
 
 // Optimize only PNGs
