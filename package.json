@@ -1,34 +1,45 @@
 {
   "name": "image-optimize",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Image compression utility",
-  "scripts": {
-    "clean": "rm -rf dist/**",
-    "build": "./node_modules/babel-cli/bin/babel.js src -d dist",
-    "postinstall": "npm run clean && npm run build",
-    "compress": "node compress.js"
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "module": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/src/index.js",
+      "types": "./dist/src/index.d.ts"
+    }
   },
   "bin": {
-    "image-optimize": "./bin/image-optimizer-cli.js"
+    "image-optimize": "./dist/bin/image-optimize.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
   },
   "author": "Arsen Ghazaryan",
   "license": "ISC",
-  "dependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "commander": "^2.19.0",
-    "confirm-simple": "^1.0.3",
-    "fs-extra": "^0.26.7",
-    "glob": "^5.0.15",
-    "jpegtran-bin": "^3.2.0",
-    "pngquant-bin": "^5.0.0",
-    "semver": "^5.6.0"
-  },
-  "main": "compress.js",
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git@github.com:arsen/image-optimizer.git"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "globby": "^14.1.0",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "typescript": "^5.8.3"
   }
 }
