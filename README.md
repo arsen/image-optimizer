@@ -1,6 +1,6 @@
 # image-optimize
 
-Image compression utility. Supports PNG and JPEG out of the box, with a plugin architecture for adding new formats.
+Image compression utility. Supports PNG, JPEG, WebP, and AVIF out of the box, with a plugin architecture for adding new formats.
 
 ## Requirements
 
@@ -24,7 +24,7 @@ image-optimize <path> [options]
 **Options:**
 | Flag | Description |
 |------|-------------|
-| `-t, --type <format>` | Image format (`png`, `jpg`). Omit to process all supported types. Ignored for single files (derived from extension). |
+| `-t, --type <format>` | Image format (`png`, `jpg`, `webp`, `avif`). Omit to process all supported types. Ignored for single files (derived from extension). |
 | `-a, --audit <threshold>` | Audit mode: list files exceeding the savings threshold (%) |
 | `-q, --quality <n>` | Compression quality 1–100 (default: 80) |
 | `-v, --verbose` | Verbose output |
@@ -48,6 +48,18 @@ Optimize a single file (type derived from extension):
 
 ```bash
 image-optimize ./photo.jpg -q 90 -f
+```
+
+Optimize only WebP files in a directory:
+
+```bash
+image-optimize ./images/ -t webp
+```
+
+Optimize AVIF files with custom quality:
+
+```bash
+image-optimize ./images/ -t avif -q 60
 ```
 
 Audit PNGs — show files that could save more than 10%:
@@ -83,9 +95,9 @@ Add support for new formats by implementing `ImageFormatPlugin`:
 import { FormatRegistry, createDefaultRegistry } from 'image-optimize';
 import type { ImageFormatPlugin, OptimizeOptions } from 'image-optimize';
 
-class WebpOptimizer implements ImageFormatPlugin {
-  name = 'webp';
-  extensions = ['.webp'];
+class TiffOptimizer implements ImageFormatPlugin {
+  name = 'tiff';
+  extensions = ['.tiff', '.tif'];
 
   async optimize(src: string, dest: string, options?: OptimizeOptions) {
     // your implementation
@@ -93,7 +105,7 @@ class WebpOptimizer implements ImageFormatPlugin {
 }
 
 const registry = createDefaultRegistry();
-registry.register(new WebpOptimizer());
+registry.register(new TiffOptimizer());
 ```
 
 ## Development

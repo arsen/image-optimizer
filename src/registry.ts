@@ -1,6 +1,8 @@
 import type { ImageFormatPlugin } from './types.js';
 import { PngOptimizer } from './plugins/png.js';
 import { JpgOptimizer } from './plugins/jpg.js';
+import { WebpOptimizer } from './plugins/webp.js';
+import { AvifOptimizer } from './plugins/avif.js';
 
 export class FormatRegistry {
   private plugins = new Map<string, ImageFormatPlugin>();
@@ -37,5 +39,7 @@ export function createDefaultRegistry(): FormatRegistry {
   const registry = new FormatRegistry();
   registry.register(new PngOptimizer());
   registry.register(new JpgOptimizer());
+  registry.register(new WebpOptimizer());
+  registry.register(new AvifOptimizer());
   return registry;
 }
