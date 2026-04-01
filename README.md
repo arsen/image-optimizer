@@ -29,6 +29,7 @@ image-optimize <path> [options]
 | `-q, --quality <n>` | Compression quality 1–100 (default: 80) |
 | `-v, --verbose` | Verbose output |
 | `-f, --force` | Overwrite originals without confirmation |
+| `-c, --concurrency <n>` | Max parallel tasks (default: CPU cores) |
 
 ### Examples
 
@@ -62,6 +63,12 @@ Optimize AVIF files with custom quality:
 image-optimize ./images/ -t avif -q 60
 ```
 
+Optimize with 4 parallel workers:
+
+```bash
+image-optimize ./images/ -c 4 -f
+```
+
 Audit PNGs — show files that could save more than 10%:
 
 ```bash
@@ -74,7 +81,7 @@ image-optimize ./assets/ -t png --audit 10
 import { optimize, audit } from 'image-optimize';
 
 // Optimize all supported images in a directory
-const result = await optimize('./images', { quality: 85, verbose: true });
+const result = await optimize('./images', { quality: 85, verbose: true, concurrency: 4 });
 console.log(`Saved ${result.totalSavingsPercent}%`);
 
 // Optimize only PNGs

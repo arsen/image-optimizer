@@ -24,6 +24,7 @@ export function createCli(): Command {
     .option('-q, --quality <n>', 'compression quality 1-100 (default: 80)', parseInt)
     .option('-v, --verbose', 'verbose output')
     .option('-f, --force', 'overwrite originals without confirmation')
+    .option('-c, --concurrency <n>', 'max parallel tasks (default: CPU cores)', parseInt)
     .action(async (inputPath: string | undefined, opts) => {
       if (!inputPath) {
         program.help();
@@ -44,6 +45,7 @@ export function createCli(): Command {
         quality: opts.quality,
         verbose: opts.verbose,
         force: opts.force,
+        concurrency: opts.concurrency,
       });
 
       let files: string[];

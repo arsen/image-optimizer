@@ -1,4 +1,5 @@
 import path from 'node:path';
+import os from 'node:os';
 import { stat, copyFile } from 'node:fs/promises';
 import { FormatRegistry } from './registry.js';
 import {
@@ -7,12 +8,19 @@ import {
   removeDir,
   getFileSize,
 } from './utils/file-utils.js';
+import { pLimit } from './utils/concurrency.js';
 import type {
   OptimizeResult,
   BatchResult,
   AuditEntry,
   OptimizeOptions,
 } from './types.js';
+
+function defaultConcurrency(): number {
+  return typeof os.availableParallelism === 'function'
+    ? os.availableParallelism()
+    : os.cpus().length;
+}
 
 export class OptimizerEngine {
   private tmpDir: string;
@@ -30,63 +38,66 @@ export class OptimizerEngine {
     format?: string,
   ): Promise<BatchResult> {
     await ensureDir(this.tmpDir);
-    const results: OptimizeResult[] = [];
+
+    const concurrency = this.options.concurrency ?? defaultConcurrency();
+    const limit = pLimit(concurrency);
+    let completed = 0;
 
     try {
-      for (let i = 0; i < files.length; i++) {
-        const src = files[i];
-        const plugin = format
-          ? this.registry.getPlugin(format)
-          : this.registry.getPluginByExtension(path.extname(src));
+      const results = await Promise.all(
+        files.map((src) =>
+          limit(async (): Promise<OptimizeResult> => {
+            const plugin = format
+              ? this.registry.getPlugin(format)
+              : this.registry.getPluginByExtension(path.extname(src));
 
-        if (!plugin) {
-          const ext = path.extname(src);
-          throw new Error(
-            `No plugin for "${format ?? ext}". Supported: ${this.registry.getSupportedFormats().join(', ')}`,
-          );
-        }
+            if (!plugin) {
+              const ext = path.extname(src);
+              throw new Error(
+                `No plugin for "${format ?? ext}". Supported: ${this.registry.getSupportedFormats().join(', ')}`,
+              );
+            }
 
-        const relative = path.relative(process.cwd(), src)
-          .split(path.sep)
-          .filter((seg) => seg !== '..')
-          .join(path.sep);
-        const dest = path.join(this.tmpDir, relative);
+            const relative = path.relative(process.cwd(), src)
+              .split(path.sep)
+              .filter((seg) => seg !== '..')
+              .join(path.sep);
+            const dest = path.join(this.tmpDir, relative);
 
-        await ensureDir(path.dirname(dest));
+            await ensureDir(path.dirname(dest));
+            await plugin.optimize(src, dest, this.options);
 
-        if (this.options.verbose) {
-          process.stdout.write(`[${i + 1}/${files.length}] ${relative} ... `);
-        }
+            const srcSize = await getFileSize(src);
+            const destSize = await getFileSize(dest);
+            const savings = srcSize - destSize;
+            const savingsPercent =
+              srcSize > 0 ? Math.round((savings / srcSize) * 100) : 0;
 
-        await plugin.optimize(src, dest, this.options);
+            const seq = ++completed;
+            if (this.options.verbose) {
+              process.stdout.write(
+                `[${seq}/${files.length}] ${relative} ... done (${Math.max(0, savingsPercent)}%)\n`,
+              );
+            }
 
-        const srcSize = await getFileSize(src);
-        const destSize = await getFileSize(dest);
-        const savings = srcSize - destSize;
-        const savingsPercent =
-          srcSize > 0 ? Math.round((savings / srcSize) * 100) : 0;
+            return {
+              src,
+              dest,
+              srcSize,
+              destSize,
+              savings,
+              savingsPercent: Math.max(0, savingsPercent),
+            };
+          }),
+        ),
+      );
 
-        const result: OptimizeResult = {
-          src,
-          dest,
-          srcSize,
-          destSize,
-          savings,
-          savingsPercent: Math.max(0, savingsPercent),
-        };
-        results.push(result);
-
-        if (this.options.verbose) {
-          console.log(`done (${result.savingsPercent}%)`);
-        }
-      }
+      this.lastResults = results;
+      return this.summarize(results);
     } catch (err) {
       await this.cleanup();
       throw err;
     }
-
-    this.lastResults = results;
-    return this.summarize(results);
   }
 
   async audit(
@@ -105,9 +116,13 @@ export class OptimizerEngine {
   }
 
   async replaceOriginals(): Promise<void> {
-    for (const result of this.lastResults) {
-      await copyFile(result.dest, result.src);
-    }
+    const concurrency = this.options.concurrency ?? defaultConcurrency();
+    const limit = pLimit(concurrency);
+    await Promise.all(
+      this.lastResults.map((result) =>
+        limit(() => copyFile(result.dest, result.src)),
+      ),
+    );
     await this.cleanup();
   }
 

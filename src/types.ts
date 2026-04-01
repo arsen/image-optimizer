@@ -23,6 +23,7 @@ export interface OptimizeOptions {
   quality?: number;
   force?: boolean;
   verbose?: boolean;
+  concurrency?: number;
 }
 
 export interface AuditOptions extends OptimizeOptions {
