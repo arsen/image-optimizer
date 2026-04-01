@@ -46,7 +46,10 @@ export class OptimizerEngine {
           );
         }
 
-        const relative = path.relative(process.cwd(), src);
+        const relative = path.relative(process.cwd(), src)
+          .split(path.sep)
+          .filter((seg) => seg !== '..')
+          .join(path.sep);
         const dest = path.join(this.tmpDir, relative);
 
         await ensureDir(path.dirname(dest));
