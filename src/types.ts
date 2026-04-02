@@ -21,6 +21,7 @@ export interface BatchResult {
 
 export interface OptimizeOptions {
   quality?: number;
+  lossless?: boolean;
   force?: boolean;
   silent?: boolean;
   concurrency?: number;

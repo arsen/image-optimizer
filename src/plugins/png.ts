@@ -10,10 +10,12 @@ export class PngOptimizer implements ImageFormatPlugin {
     dest: string,
     options?: OptimizeOptions,
   ): Promise<void> {
-    const quality = options?.quality ?? 80;
+    const pngOpts: sharp.PngOptions = options?.lossless
+      ? { palette: false, effort: 7 }
+      : { quality: options?.quality ?? 80, effort: 7 };
 
     await sharp(src)
-      .png({ quality, effort: 7 })
+      .png(pngOpts)
       .toFile(dest);
   }
 }

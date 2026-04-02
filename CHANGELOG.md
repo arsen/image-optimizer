@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.0
+
+### Added
+
+- **`--lossless` / `-l` flag** — enables lossless compression for PNG, WebP, and AVIF. When set, `quality` is ignored and format-native lossless modes are used instead.
+- **JPEG lossless skip** — JPEG files are skipped with a stderr warning when `--lossless` is set, since the format has no lossless mode. The original file is copied through unchanged so the pipeline reports 0% savings.
+- **`lossless` option in programmatic API** — pass `{ lossless: true }` to `optimize()` or `audit()`.
+
 ## 2.0.0
 
 Complete rewrite in TypeScript.

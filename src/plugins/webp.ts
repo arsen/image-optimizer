@@ -10,10 +10,12 @@ export class WebpOptimizer implements ImageFormatPlugin {
     dest: string,
     options?: OptimizeOptions,
   ): Promise<void> {
-    const quality = options?.quality ?? 80;
+    const webpOpts: sharp.WebpOptions = options?.lossless
+      ? { lossless: true, effort: 6 }
+      : { quality: options?.quality ?? 80, effort: 6 };
 
     await sharp(src)
-      .webp({ quality, effort: 6 })
+      .webp(webpOpts)
       .toFile(dest);
   }
 }

@@ -27,6 +27,7 @@ image-optimize <path> [options]
 | `-t, --type <format>` | Image format (`png`, `jpg`, `webp`, `avif`). Omit to process all supported types. Ignored for single files (derived from extension). |
 | `-a, --audit <threshold>` | Audit mode: list files exceeding the savings threshold (%) |
 | `-q, --quality <n>` | Compression quality 1–100 (default: 80) |
+| `-l, --lossless` | Lossless compression (JPEG files will be skipped) |
 | `-s, --silent` | Suppress per-file output |
 | `-f, --force` | Overwrite originals without confirmation |
 | `-c, --concurrency <n>` | Max parallel tasks (default: CPU cores) |
@@ -69,6 +70,12 @@ Optimize with 4 parallel workers:
 image-optimize ./images/ -c 4 -f
 ```
 
+Lossless compression for PNG, WebP, and AVIF (JPEG files skipped):
+
+```bash
+image-optimize ./images/ --lossless -f
+```
+
 Audit PNGs — show files that could save more than 10%:
 
 ```bash
@@ -82,6 +89,9 @@ import { optimize, audit } from 'image-optimize';
 
 // Optimize all supported images in a directory
 const result = await optimize('./images', { quality: 85, concurrency: 4 });
+
+// Lossless compression (JPEG files are skipped)
+const losslessResult = await optimize('./images', { lossless: true });
 console.log(`Saved ${result.totalSavingsPercent}%`);
 
 // Optimize only PNGs

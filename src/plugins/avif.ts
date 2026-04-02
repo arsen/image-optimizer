@@ -10,10 +10,12 @@ export class AvifOptimizer implements ImageFormatPlugin {
     dest: string,
     options?: OptimizeOptions,
   ): Promise<void> {
-    const quality = options?.quality ?? 50;
+    const avifOpts: sharp.AvifOptions = options?.lossless
+      ? { lossless: true, effort: 6 }
+      : { quality: options?.quality ?? 50, effort: 6 };
 
     await sharp(src)
-      .avif({ quality, effort: 6 })
+      .avif(avifOpts)
       .toFile(dest);
   }
 }

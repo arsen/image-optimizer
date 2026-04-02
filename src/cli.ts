@@ -17,11 +17,12 @@ export function createCli(): Command {
   program
     .name('image-optimize')
     .description('Image compression utility')
-    .version('2.0.0')
+    .version('2.1.0')
     .argument('[path]', 'file or directory path')
     .option('-t, --type <format>', `image format (${formats.join(', ')}); omit to process all supported types`)
     .option('-a, --audit <threshold>', 'audit mode: list files above savings threshold (%)', parseInt)
     .option('-q, --quality <n>', 'compression quality 1-100 (default: 80)', parseInt)
+    .option('-l, --lossless', 'lossless compression (JPEG files will be skipped)')
     .option('-s, --silent', 'suppress per-file output')
     .option('-f, --force', 'overwrite originals without confirmation')
     .option('-c, --concurrency <n>', 'max parallel tasks (default: CPU cores)', parseInt)
@@ -43,6 +44,7 @@ export function createCli(): Command {
 
       const engine = new OptimizerEngine(registry, {
         quality: opts.quality,
+        lossless: opts.lossless,
         silent: opts.silent,
         force: opts.force,
         concurrency: opts.concurrency,
