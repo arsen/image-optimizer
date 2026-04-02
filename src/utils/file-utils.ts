@@ -4,11 +4,12 @@ import { globby } from 'globby';
 export async function findFiles(
   dir: string,
   extensions: string[],
+  ignore?: string[],
 ): Promise<string[]> {
   const patterns = extensions.map(
     (ext) => `${dir}/**/*${ext}`,
   );
-  return globby(patterns, { absolute: true });
+  return globby(patterns, { absolute: true, ignore });
 }
 
 export async function findSingleFile(filePath: string): Promise<string[]> {

@@ -25,6 +25,7 @@ export interface OptimizeOptions {
   force?: boolean;
   silent?: boolean;
   concurrency?: number;
+  ignore?: string[];
 }
 
 export interface AuditOptions extends OptimizeOptions {

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.2.0
+
+### Added
+
+- **`--ignore` / `-i` flag** — accepts one or more glob patterns to exclude files from processing (e.g. `--ignore "vendor/*" "temp/*"`). Patterns are forwarded to globby's `ignore` option during directory scanning.
+- **`ignore` option in programmatic API** — pass `{ ignore: ['pattern'] }` to `optimize()` or `audit()`.
+
 ## 2.1.0
 
 ### Added

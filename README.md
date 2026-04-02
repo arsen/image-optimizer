@@ -31,6 +31,7 @@ image-optimize <path> [options]
 | `-s, --silent` | Suppress per-file output |
 | `-f, --force` | Overwrite originals without confirmation |
 | `-c, --concurrency <n>` | Max parallel tasks (default: CPU cores) |
+| `-i, --ignore <pattern...>` | Glob patterns to exclude from processing |
 
 ### Examples
 
@@ -76,6 +77,12 @@ Lossless compression for PNG, WebP, and AVIF (JPEG files skipped):
 image-optimize ./images/ --lossless -f
 ```
 
+Ignore specific folders or patterns:
+
+```bash
+image-optimize ./assets/ --ignore "vendor/*" "temp/*"
+```
+
 Audit PNGs — show files that could save more than 10%:
 
 ```bash
@@ -96,6 +103,9 @@ console.log(`Saved ${result.totalSavingsPercent}%`);
 
 // Optimize only PNGs
 const pngResult = await optimize('./images', { quality: 85 }, 'png');
+
+// Ignore specific folders
+const filtered = await optimize('./images', { ignore: ['vendor/*', 'temp/*'] });
 
 // Audit JPEGs — dry run, no files modified
 const entries = await audit('./photos', 10, {}, 'jpg');

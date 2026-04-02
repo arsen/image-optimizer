@@ -1,6 +1,6 @@
 {
   "name": "image-optimize",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Image compression utility",
   "type": "module",
   "main": "./dist/src/index.js",
@@ -36,6 +36,7 @@
   "dependencies": {
     "commander": "^13.1.0",
     "globby": "^14.1.0",
+    "image-optimize": "^2.1.0",
     "sharp": "^0.33.5"
   },
   "devDependencies": {

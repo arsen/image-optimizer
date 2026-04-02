@@ -17,7 +17,7 @@ export function createCli(): Command {
   program
     .name('image-optimize')
     .description('Image compression utility')
-    .version('2.1.0')
+    .version('2.2.0')
     .argument('[path]', 'file or directory path')
     .option('-t, --type <format>', `image format (${formats.join(', ')}); omit to process all supported types`)
     .option('-a, --audit <threshold>', 'audit mode: list files above savings threshold (%)', parseInt)
@@ -26,6 +26,7 @@ export function createCli(): Command {
     .option('-s, --silent', 'suppress per-file output')
     .option('-f, --force', 'overwrite originals without confirmation')
     .option('-c, --concurrency <n>', 'max parallel tasks (default: CPU cores)', parseInt)
+    .option('-i, --ignore <pattern...>', 'glob patterns to exclude (e.g. --ignore "example/*")')
     .action(async (inputPath: string | undefined, opts) => {
       if (!inputPath) {
         program.help();
@@ -48,6 +49,7 @@ export function createCli(): Command {
         silent: opts.silent,
         force: opts.force,
         concurrency: opts.concurrency,
+        ignore: opts.ignore,
       });
 
       let files: string[];

@@ -153,7 +153,7 @@ export class OptimizerEngine {
             : 'No formats registered',
         );
       }
-      return findFiles(resolved, extensions);
+      return findFiles(resolved, extensions, this.options.ignore);
     }
 
     throw new Error(`Path is neither a file nor a directory: ${inputPath}`);
